@@ -76,8 +76,23 @@ const bulkCreateNotes = async (req, res) => {
 // @route   GET /api/notes
 // @access  Public
 const getAllNotes = async (req, res) => {
-  res.status(501).json({ success: false, message: "Not implemented" });
+  try {
+    const notes = await Note.find();
+
+    res.status(200).json({
+      success: true,
+      message: "Notes fetched successfully",
+      data: notes
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server Error",
+      data: null
+    });
+  }
 };
+
 
 // @desc    Get a single note by ID
 // @route   GET /api/notes/:id
