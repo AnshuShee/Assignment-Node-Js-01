@@ -281,8 +281,34 @@ const deleteNote = async (req, res) => {
 // @route   DELETE /api/notes/bulk
 // @access  Public
 const bulkDeleteNotes = async (req, res) => {
-  res.status(501).json({ success: false, message: "Not implemented" });
+  try {
+    const { ids } = req.body;
+
+    // Validation
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide an array of IDs",
+        data: null
+      });
+    }
+
+    const result = await Note.deleteMany({ _id: { $in: ids } });
+
+    res.status(200).json({
+      success: true,
+      message: `${result.deletedCount} notes deleted successfully`,
+      data: null
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server Error",
+      data: null
+    });
+  }
 };
+
 
 module.exports = {
   createNote,
