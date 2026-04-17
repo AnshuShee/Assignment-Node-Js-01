@@ -139,8 +139,48 @@ const getNoteById = async (req, res) => {
 // @route   PUT /api/notes/:id
 // @access  Public
 const replaceNote = async (req, res) => {
-  res.status(501).json({ success: false, message: "Not implemented" });
+  try {
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Note ID",
+        data: null
+      });
+    }
+
+    // PUT requires full replacement. In Mongoose, findByIdAndUpdate with overwrite: true
+    // will replace the document. We pass req.body directly.
+    const note = await Note.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, overwrite: true, runValidators: true }
+    );
+
+    if (!note) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+        data: null
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Note replaced successfully",
+      data: note
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message || "Invalid Data",
+      data: null
+    });
+  }
 };
+
 
 // @desc    Update specific fields (PATCH)
 // @route   PATCH /api/notes/:id
